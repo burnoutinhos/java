@@ -23,8 +23,8 @@ APP_INSIGHTS_NAME="ai-burnoutinhos-api"
 # Variáveis do Event Hubs
 EVENTHUBS_NAMESPACE="evh-ns-burnoutinhos"
 EVENTHUB_NAME="burnoutinhos-events"
-EVENTHUBS_RG_NAME=$RESOURCE_GROUP_NAME # Usaremos o mesmo RG do App Service
 EVENTHUBS_SKU="Basic" # Basic, Standard, Premium
+EVENTHUBS_RG_NAME=$RESOURCE_GROUP_NAME # Usaremos o mesmo RG do App Service
 
 # ============================
 # PROVIDERS E EXTENSÕES (Geralmente seguros para rodar sempre)
@@ -150,14 +150,9 @@ fi
 if [ -n "$(az eventhubs eventhub show --name $EVENTHUB_NAME --namespace-name $EVENTHUBS_NAMESPACE --resource-group $EVENTHUBS_RG_NAME --query name -o tsv 2>/dev/null)" ]; then
     echo "Event Hub $EVENTHUB_NAME já existe. Pulando a criação."
 else
-    echo "Criando Event Hub $EVENTHUB_NAME..."
-    az eventhubs eventhub create \
-        --resource-group $EVENTHUBS_RG_NAME \
-        --namespace-name $EVENTHUBS_NAMESPACE \
-        --name $EVENTHUB_NAME \
-        --message-retention 1 \
-        --partition-count 1
+    az eventhubs eventhub create --resource-group $EVENTHUBS_RG_NAME --namespace-name $EVENTHUBS_NAMESPACE --name $EVENTHUB_NAME --partition-count 1
 fi
+
 
 # Obter a Connection String primária para o App Service
 EVENTHUBS_CS=$(az eventhubs namespace authorization-rule keys list \
