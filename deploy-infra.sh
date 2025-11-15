@@ -124,17 +124,26 @@ CONNECTION_STRING=$(az monitor app-insights component show \
 # ============================
 # AZURE EVENT HUBS
 # ============================
+# ============================
+# AZURE EVENT HUBS (FREE TIER)
+# ============================
 
-# Verificar e criar Event Hubs Namespace
+# Free Tier só funciona no primeiro namespace Standard da conta
+EVENTHUBS_SKU="Standard"
+
+# Verificar e criar Event Hubs Namespace (FREE TIER)
 if [ -n "$(az eventhubs namespace show --name $EVENTHUBS_NAMESPACE --resource-group $EVENTHUBS_RG_NAME --query name -o tsv 2>/dev/null)" ]; then
     echo "Event Hubs Namespace $EVENTHUBS_NAMESPACE já existe. Pulando a criação."
 else
-    echo "Criando Event Hubs Namespace $EVENTHUBS_NAMESPACE..."
+    echo "Criando Event Hubs Namespace (FREE TIER) $EVENTHUBS_NAMESPACE..."
     az eventhubs namespace create \
         --name $EVENTHUBS_NAMESPACE \
         --resource-group $EVENTHUBS_RG_NAME \
         --location "$LOCATION" \
-        --sku $EVENTHUBS_SKU
+        --sku Standard \
+        --capacity 1 \
+        --enable-auto-inflate false \
+        --tags free-tier=true
 fi
 
 # Verificar e criar Event Hub (Tópico)
@@ -147,7 +156,7 @@ else
         --namespace-name $EVENTHUBS_NAMESPACE \
         --name $EVENTHUB_NAME \
         --message-retention 1 \
-        --partition-count 2
+        --partition-count 1
 fi
 
 # Obter a Connection String primária para o App Service
@@ -157,6 +166,7 @@ EVENTHUBS_CS=$(az eventhubs namespace authorization-rule keys list \
     --name RootManageSharedAccessKey \
     --query primaryConnectionString \
     --output tsv)
+
 
 
 # ============================
