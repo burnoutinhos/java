@@ -143,11 +143,11 @@ if [ -n "$(az eventhubs eventhub show --name $EVENTHUB_NAME --namespace-name $EV
 else
     echo "Criando Event Hub $EVENTHUB_NAME..."
     az eventhubs eventhub create \
-        --name $EVENTHUB_NAME \
-        --namespace-name $EVENTHUBS_NAMESPACE \
         --resource-group $EVENTHUBS_RG_NAME \
-        --partition-count 2 \
-        --message-retention 1
+        --namespace-name $EVENTHUBS_NAMESPACE \
+        --name $EVENTHUB_NAME \
+        --message-retention 1 \
+        --partition-count 2
 fi
 
 # Obter a Connection String primária para o App Service
