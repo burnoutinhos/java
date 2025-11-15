@@ -183,15 +183,5 @@ az monitor app-insights component connect-webapp \
     --web-app $WEBAPP_NAME \
     --resource-group $RESOURCE_GROUP_NAME
 
-# ============================
-# DEPLOY VIA GITHUB ACTIONS (idempotente)
-# ============================
-echo "Configurando GitHub Actions..."
-az webapp deployment github-actions add \
-  --name $WEBAPP_NAME \
-  --resource-group $RESOURCE_GROUP_NAME \
-  --repo $GITHUB_REPO_NAME \
-  --branch $BRANCH \
-  --login-with-github
 
 echo "✅ Script de configuração/verificação concluído com sucesso!"
