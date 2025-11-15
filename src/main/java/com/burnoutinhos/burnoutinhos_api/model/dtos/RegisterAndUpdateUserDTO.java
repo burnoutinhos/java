@@ -2,6 +2,7 @@ package com.burnoutinhos.burnoutinhos_api.model.dtos;
 
 import com.burnoutinhos.burnoutinhos_api.model.enums.LanguagePreference;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ public class RegisterAndUpdateUserDTO {
     private String name;
 
     @Email
+    @NotEmpty
     private String email;
 
     @Nullable

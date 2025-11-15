@@ -4,10 +4,8 @@ import com.burnoutinhos.burnoutinhos_api.config.AuthenticationUtil;
 import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.TimeBlock;
-import com.burnoutinhos.burnoutinhos_api.repository.AppUserRepository;
 import com.burnoutinhos.burnoutinhos_api.repository.TimeBlockRepository;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -24,9 +22,6 @@ public class TimeBlockService {
     @Autowired
     private TimeBlockRepository repository;
 
-    @Autowired
-    private AppUserRepository appUserRepository;
-
     /**
      * Persiste uma entidade {@link TimeBlock}.
      * Se o usuário não estiver presente na entidade, extrai o userId do token autenticado.
@@ -34,12 +29,7 @@ public class TimeBlockService {
     @Transactional
     public TimeBlock save(TimeBlock timeBlock) {
         if (timeBlock.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             timeBlock.setUser(user);
         }
         return repository.save(timeBlock);
@@ -92,12 +82,7 @@ public class TimeBlockService {
         }
 
         if (timeBlock.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             timeBlock.setUser(user);
         }
 

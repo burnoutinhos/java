@@ -1,14 +1,20 @@
 package com.burnoutinhos.burnoutinhos_api.controller;
 
+import com.burnoutinhos.burnoutinhos_api.exceptions.BadRequestException;
 import com.burnoutinhos.burnoutinhos_api.model.TimeBlock;
+import com.burnoutinhos.burnoutinhos_api.model.dtos.TimeBlockDTO;
 import com.burnoutinhos.burnoutinhos_api.service.TimeBlockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +25,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Scaffold REST controller para a entidade TimeBlock.
- * Métodos intencionalmente vazios — apenas assinaturas e anotações.
+ * Controller REST para TimeBlock com validação e tratamento de BindingResult.
  */
 @RestController
 @RequestMapping("/timeblocks")
@@ -48,8 +53,22 @@ public class TimeBlockController {
         }
     )
     @PostMapping
-    public ResponseEntity<TimeBlock> create(@RequestBody TimeBlock timeBlock) {
-        return null;
+    public ResponseEntity<TimeBlock> create(
+        @Valid @RequestBody TimeBlockDTO dto,
+        BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException(
+                "Create TimeBlock not valid",
+                bindingResult
+            );
+        }
+
+        TimeBlock timeBlock = new TimeBlock();
+        BeanUtils.copyProperties(dto, timeBlock);
+
+        TimeBlock saved = service.save(timeBlock);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(
@@ -65,7 +84,11 @@ public class TimeBlockController {
     )
     @GetMapping
     public ResponseEntity<List<TimeBlock>> findAll() {
-        return null;
+        List<TimeBlock> list = service.findAll();
+        if (list == null || list.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(list);
     }
 
     @Operation(
@@ -81,7 +104,8 @@ public class TimeBlockController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<TimeBlock> findById(@PathVariable Long id) {
-        return null;
+        TimeBlock tb = service.findById(id);
+        return ResponseEntity.ok(tb);
     }
 
     @Operation(
@@ -102,9 +126,22 @@ public class TimeBlockController {
     @PutMapping("/{id}")
     public ResponseEntity<TimeBlock> update(
         @PathVariable Long id,
-        @RequestBody TimeBlock timeBlock
+        @Valid @RequestBody TimeBlockDTO dto,
+        BindingResult bindingResult
     ) {
-        return null;
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException(
+                "Update TimeBlock not valid",
+                bindingResult
+            );
+        }
+
+        TimeBlock timeBlock = new TimeBlock();
+        BeanUtils.copyProperties(dto, timeBlock);
+        timeBlock.setId(id);
+
+        TimeBlock updated = service.update(timeBlock);
+        return ResponseEntity.ok(updated);
     }
 
     @Operation(
@@ -120,6 +157,7 @@ public class TimeBlockController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return null;
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

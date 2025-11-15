@@ -1,6 +1,8 @@
 package com.burnoutinhos.burnoutinhos_api.config;
 
+import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
+import com.burnoutinhos.burnoutinhos_api.repository.AppUserRepository;
 import com.burnoutinhos.burnoutinhos_api.service.AppUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,7 +23,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     private JWTUtil jwtUtil;
 
     @Autowired
-    private AppUserService userService;
+    private AppUserRepository appUserRepository;
 
     @Override
     protected void doFilterInternal(
@@ -39,7 +41,11 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                 username != null &&
                 SecurityContextHolder.getContext().getAuthentication() == null
             ) {
-                AppUser user = userService.loadUserByUsername(username);
+                AppUser user = appUserRepository
+                    .findByEmail(username)
+                    .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found")
+                    );
 
                 if (jwtUtil.validateToken(token)) {
                     Authentication auth =

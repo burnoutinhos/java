@@ -4,10 +4,8 @@ import com.burnoutinhos.burnoutinhos_api.config.AuthenticationUtil;
 import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.Suggestion;
-import com.burnoutinhos.burnoutinhos_api.repository.AppUserRepository;
 import com.burnoutinhos.burnoutinhos_api.repository.SuggestionRepository;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -22,9 +20,6 @@ public class SuggestionService {
     @Autowired
     private SuggestionRepository repository;
 
-    @Autowired
-    private AppUserRepository appUserRepository;
-
     /**
      * Persiste uma entidade {@link Suggestion}.
      * Se o usuário não estiver presente, extrai o userId do token autenticado.
@@ -32,12 +27,7 @@ public class SuggestionService {
     @Transactional
     public Suggestion save(Suggestion suggestion) {
         if (suggestion.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             suggestion.setUser(user);
         }
         return repository.save(suggestion);
@@ -90,12 +80,7 @@ public class SuggestionService {
         }
 
         if (suggestion.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             suggestion.setUser(user);
         }
 

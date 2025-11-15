@@ -5,7 +5,6 @@ import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.Analytics;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.repository.AnalyticsRepository;
-import com.burnoutinhos.burnoutinhos_api.repository.AppUserRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -18,24 +17,13 @@ public class AnalyticsService {
     @Autowired
     private AnalyticsRepository repository;
 
-    @Autowired
-    private AppUserRepository appUserRepository;
-
     /**
      * Persiste uma entidade {@link Analytics}.
      * Se não houver usuário na entidade, extrai o userId do token autenticado.
      */
     @Transactional
     public Analytics save(Analytics analytics) {
-        if (analytics.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
-            analytics.setUser(user);
-        }
+        analytics.setUser(AuthenticationUtil.extractUserFromToken());
         return repository.save(analytics);
     }
 
@@ -86,12 +74,7 @@ public class AnalyticsService {
         }
 
         if (analytics.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             analytics.setUser(user);
         }
 

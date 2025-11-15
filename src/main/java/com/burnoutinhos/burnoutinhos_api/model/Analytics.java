@@ -1,6 +1,7 @@
 package com.burnoutinhos.burnoutinhos_api.model;
 
 import com.burnoutinhos.burnoutinhos_api.model.enums.AnalyticsType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,14 +14,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Analytics {
 
     @Id
@@ -29,6 +34,7 @@ public class Analytics {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private AppUser user;
 
     private String value;

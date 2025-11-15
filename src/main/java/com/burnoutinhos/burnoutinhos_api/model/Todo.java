@@ -1,6 +1,7 @@
 package com.burnoutinhos.burnoutinhos_api.model;
 
 import com.burnoutinhos.burnoutinhos_api.model.enums.TodoType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,15 +13,19 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Todo {
 
     @Id
@@ -30,6 +35,8 @@ public class Todo {
     private String name;
     private String description;
     private LocalDateTime start;
+
+    @Column(name = "end_time")
     private LocalDateTime end;
 
     @Column(name = "is_completed")
@@ -46,7 +53,12 @@ public class Todo {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "suggestion_id")
+    private Suggestion suggestion;
+
     @JoinColumn(name = "user_id")
     @ManyToOne
+    @JsonIgnore
     private AppUser user;
 }

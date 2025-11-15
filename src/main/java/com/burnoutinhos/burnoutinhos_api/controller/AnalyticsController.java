@@ -1,137 +1,135 @@
 package com.burnoutinhos.burnoutinhos_api.controller;
 
+import com.burnoutinhos.burnoutinhos_api.exceptions.BadRequestException;
 import com.burnoutinhos.burnoutinhos_api.model.Analytics;
 import com.burnoutinhos.burnoutinhos_api.service.AnalyticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Scaffold REST controller para a entidade Analytics.
- * Métodos intencionalmente vazios — apenas assinaturas e anotações.
+ * REST controller for Analytics resource.
+ * Implements basic CRUD endpoints and validates request bodies using @Valid + BindingResult.
  */
 @RestController
 @RequestMapping("/analytics")
-@Tag(
-    name = "Analytics",
-    description = "Endpoints para gerenciar registros de analytics"
-)
+@Tag(name = "Analytics", description = "Endpoints to manage analytics records")
 public class AnalyticsController {
 
     @Autowired
     private AnalyticsService service;
 
     @Operation(
-        summary = "Criar analytics",
-        description = "Cria um novo recurso Analytics."
+        summary = "Create analytics",
+        description = "Creates a new Analytics record."
     )
     @ApiResponses(
         {
-            @ApiResponse(
-                responseCode = "201",
-                description = "Analytics criado"
-            ),
-            @ApiResponse(
-                responseCode = "400",
-                description = "Requisição inválida"
-            ),
+            @ApiResponse(responseCode = "201", description = "Created"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
         }
     )
     @PostMapping
-    public ResponseEntity<Analytics> create(@RequestBody Analytics analytics) {
-        return null;
+    public ResponseEntity<Analytics> create(
+        @Valid @RequestBody Analytics analytics,
+        BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException(
+                "Create analytics not valid",
+                bindingResult
+            );
+        }
+
+        Analytics saved = service.save(analytics);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @Operation(
-        summary = "Listar analytics",
-        description = "Retorna a lista de todos os registros de Analytics."
+        summary = "List analytics",
+        description = "Returns all analytics records."
     )
     @ApiResponses(
         {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista retornada com sucesso"
-            ),
-            @ApiResponse(responseCode = "204", description = "Nenhum conteúdo"),
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "204", description = "No content"),
         }
     )
     @GetMapping
     public ResponseEntity<List<Analytics>> findAll() {
-        return null;
+        List<Analytics> list = service.findAll();
+        if (list == null || list.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(list);
     }
 
     @Operation(
-        summary = "Buscar analytics por ID",
-        description = "Retorna um registro de Analytics pelo seu ID."
+        summary = "Get analytics by ID",
+        description = "Returns an Analytics record by its ID."
     )
     @ApiResponses(
         {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Registro encontrado"
-            ),
-            @ApiResponse(
-                responseCode = "404",
-                description = "Registro não encontrado"
-            ),
+            @ApiResponse(responseCode = "200", description = "Found"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
         }
     )
     @GetMapping("/{id}")
     public ResponseEntity<Analytics> findById(@PathVariable Long id) {
-        return null;
+        Analytics a = service.findById(id);
+        return ResponseEntity.ok(a);
     }
 
     @Operation(
-        summary = "Atualizar analytics",
-        description = "Atualiza um registro de Analytics existente."
+        summary = "Update analytics",
+        description = "Updates an existing Analytics record."
     )
     @ApiResponses(
         {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Registro atualizado"
-            ),
-            @ApiResponse(
-                responseCode = "400",
-                description = "Requisição inválida"
-            ),
-            @ApiResponse(
-                responseCode = "404",
-                description = "Registro não encontrado"
-            ),
+            @ApiResponse(responseCode = "200", description = "Updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
         }
     )
     @PutMapping("/{id}")
     public ResponseEntity<Analytics> update(
         @PathVariable Long id,
-        @RequestBody Analytics analytics
+        @Valid @RequestBody Analytics analytics,
+        BindingResult bindingResult
     ) {
-        return null;
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException(
+                "Update analytics not valid",
+                bindingResult
+            );
+        }
+
+        analytics.setId(id);
+        Analytics updated = service.update(analytics);
+        return ResponseEntity.ok(updated);
     }
 
     @Operation(
-        summary = "Remover analytics",
-        description = "Remove um registro de Analytics pelo seu ID."
+        summary = "Delete analytics",
+        description = "Deletes an Analytics record by ID."
     )
     @ApiResponses(
         {
-            @ApiResponse(
-                responseCode = "204",
-                description = "Removido com sucesso"
-            ),
-            @ApiResponse(
-                responseCode = "404",
-                description = "Registro não encontrado"
-            ),
+            @ApiResponse(responseCode = "204", description = "Deleted"),
+            @ApiResponse(responseCode = "404", description = "Not found"),
         }
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return null;
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

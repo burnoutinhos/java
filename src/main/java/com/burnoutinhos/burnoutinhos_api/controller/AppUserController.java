@@ -1,27 +1,39 @@
 package com.burnoutinhos.burnoutinhos_api.controller;
 
+import com.burnoutinhos.burnoutinhos_api.exceptions.BadRequestException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
+import com.burnoutinhos.burnoutinhos_api.model.dtos.AuthResponseDTO;
+import com.burnoutinhos.burnoutinhos_api.model.dtos.LoginDTO;
+import com.burnoutinhos.burnoutinhos_api.model.dtos.RegisterAndUpdateUserDTO;
 import com.burnoutinhos.burnoutinhos_api.service.AppUserService;
+import com.burnoutinhos.burnoutinhos_api.service.auth.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * Scaffold REST controller para a entidade AppUser.
- * Métodos intencionalmente vazios — apenas assinaturas e anotações.
+ * REST controller para a entidade AppUser.
  */
 @RestController
 @RequestMapping("/users")
 @Tag(name = "Users", description = "Endpoints para gerenciar usuários")
+@Log4j2
 public class AppUserController {
 
     @Autowired
     private AppUserService service;
+
+    @Autowired
+    private AuthenticationService authService;
 
     @Operation(
         summary = "Registrar usuário",
@@ -37,9 +49,21 @@ public class AppUserController {
             @ApiResponse(responseCode = "401", description = "Não autorizado"),
         }
     )
-    @PostMapping
-    public ResponseEntity<AppUser> register(@RequestBody AppUser user) {
-        return null;
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponseDTO> register(
+        @Valid @RequestBody RegisterAndUpdateUserDTO dto,
+        BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException(
+                "Register user not valid",
+                bindingResult
+            );
+        }
+
+        log.info("register controller method dto {}", dto);
+        AuthResponseDTO response = authService.register(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Operation(
@@ -59,9 +83,17 @@ public class AppUserController {
             ),
         }
     )
-    @PostMapping
-    public ResponseEntity<AppUser> login(@RequestBody AppUser user) {
-        return null;
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDTO> login(
+        @Valid @RequestBody LoginDTO dto,
+        BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException("Login not valid", bindingResult);
+        }
+
+        AuthResponseDTO response = authService.login(dto);
+        return ResponseEntity.ok(response);
     }
 
     @Operation(
@@ -77,7 +109,11 @@ public class AppUserController {
     )
     @GetMapping
     public ResponseEntity<List<AppUser>> findAll() {
-        return null;
+        List<AppUser> users = service.findAll();
+        if (users == null || users.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(users);
     }
 
     @Operation(
@@ -93,7 +129,8 @@ public class AppUserController {
     )
     @GetMapping("/{id}")
     public ResponseEntity<AppUser> findById(@PathVariable Long id) {
-        return null;
+        AppUser user = service.findById(id);
+        return ResponseEntity.ok(user);
     }
 
     @Operation(
@@ -111,12 +148,19 @@ public class AppUserController {
             @ApiResponse(responseCode = "401", description = "Não autorizado"),
         }
     )
-    @PutMapping("/{id}")
-    public ResponseEntity<AppUser> update(
-        @PathVariable Long id,
-        @RequestBody AppUser user
+    @PutMapping
+    public ResponseEntity<AuthResponseDTO> update(
+        @Valid @RequestBody RegisterAndUpdateUserDTO dto,
+        BindingResult bindingResult
     ) {
-        return null;
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException(
+                "Update user not valid",
+                bindingResult
+            );
+        }
+
+        return ResponseEntity.ok(authService.updateAndRegister(dto));
     }
 
     @Operation(
@@ -135,6 +179,7 @@ public class AppUserController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        return null;
+        service.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

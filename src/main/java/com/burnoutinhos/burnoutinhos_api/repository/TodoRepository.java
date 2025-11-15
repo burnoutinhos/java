@@ -28,16 +28,6 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
 
     List<Todo> findByNameContainingIgnoreCase(String text);
 
-    List<Todo> findByStartDateBetween(LocalDateTime start, LocalDateTime end);
-
-    List<Todo> findByEndDateBetween(LocalDateTime start, LocalDateTime end);
-
-    List<Todo> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
-
-    List<Todo> findByUpdatedAtBetween(LocalDateTime start, LocalDateTime end);
-
-    Optional<Todo> findTopByUserOrderByCreatedAtDesc(AppUser user);
-
     void deleteByUserId(Long userId);
 
     Page<Todo> findByUser(AppUser user, Pageable pageable);

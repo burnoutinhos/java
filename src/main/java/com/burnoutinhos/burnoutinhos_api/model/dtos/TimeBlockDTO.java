@@ -2,10 +2,16 @@ package com.burnoutinhos.burnoutinhos_api.model.dtos;
 
 import com.burnoutinhos.burnoutinhos_api.model.enums.TimeBlockType;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.lang.Nullable;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TimeBlockDTO {
 
     @Size(min = 3)

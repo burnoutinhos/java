@@ -4,10 +4,10 @@ import com.burnoutinhos.burnoutinhos_api.config.AuthenticationUtil;
 import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.Todo;
-import com.burnoutinhos.burnoutinhos_api.repository.AppUserRepository;
+import com.burnoutinhos.burnoutinhos_api.model.dtos.TodoDTO;
 import com.burnoutinhos.burnoutinhos_api.repository.TodoRepository;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -25,7 +25,7 @@ public class TodoService {
     private TodoRepository repository;
 
     @Autowired
-    private AppUserRepository appUserRepository;
+    private SuggestionService suggestionService;
 
     /**
      * Persiste uma entidade {@link Todo}.
@@ -34,12 +34,7 @@ public class TodoService {
     @Transactional
     public Todo save(Todo todo) {
         if (todo.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             todo.setUser(user);
         }
         return repository.save(todo);
@@ -83,19 +78,22 @@ public class TodoService {
      * Verifica existência e preenche o usuário a partir do token, se necessário.
      */
     @Transactional
-    public Todo update(Todo todo) {
-        Long id = todo.getId();
+    public Todo update(TodoDTO dto, Long id) {
+        Todo todo = findById(id);
+        BeanUtils.copyProperties(dto, todo);
+
+        if (dto.getSuggestionId() != null) {
+            todo.setSuggestion(
+                suggestionService.findById(dto.getSuggestionId())
+            );
+        }
+
         if (id == null || !repository.existsById(id)) {
             throw new ResourceNotFoundException("Todo not found");
         }
 
         if (todo.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             todo.setUser(user);
         }
 

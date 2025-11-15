@@ -4,10 +4,8 @@ import com.burnoutinhos.burnoutinhos_api.config.AuthenticationUtil;
 import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.Notification;
-import com.burnoutinhos.burnoutinhos_api.repository.AppUserRepository;
 import com.burnoutinhos.burnoutinhos_api.repository.NotificationRepository;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -22,9 +20,6 @@ public class NotificationService {
     @Autowired
     private NotificationRepository repository;
 
-    @Autowired
-    private AppUserRepository appUserRepository;
-
     /**
      * Persiste uma entidade {@link Notification}.
      * Se o usuário não estiver presente na entidade, extrai o userId do token autenticado.
@@ -32,12 +27,7 @@ public class NotificationService {
     @Transactional
     public Notification save(Notification notification) {
         if (notification.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             notification.setUser(user);
         }
         return repository.save(notification);
@@ -90,12 +80,7 @@ public class NotificationService {
         }
 
         if (notification.getUser() == null) {
-            Long userId = AuthenticationUtil.extractUserIdFromToken();
-            AppUser user = appUserRepository
-                .findById(userId)
-                .orElseThrow(() ->
-                    new ResourceNotFoundException("User not found")
-                );
+            AppUser user = AuthenticationUtil.extractUserFromToken();
             notification.setUser(user);
         }
 

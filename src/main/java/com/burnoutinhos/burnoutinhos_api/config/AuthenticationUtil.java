@@ -27,4 +27,22 @@ public class AuthenticationUtil {
         AppUser user = (AppUser) principal;
         return user.getId();
     }
+
+    public static AppUser extractUserFromToken() {
+        Authentication auth =
+            SecurityContextHolder.getContext().getAuthentication();
+
+        if (auth == null) {
+            throw new UserNotAuthorizedException("Not authenticated");
+        }
+
+        Object principal = auth.getPrincipal();
+
+        if (!(principal instanceof AppUser)) {
+            throw new ConversionErrorException("Couldn't convert to user");
+        }
+
+        AppUser user = (AppUser) principal;
+        return user;
+    }
 }
