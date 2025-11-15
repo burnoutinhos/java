@@ -13,12 +13,18 @@ RUNTIME="JAVA:21-java21"
 RG_DB_NAME="rg-sql-burnoutinhos"
 DB_USERNAME="burnoutinhos-admin"
 DB_NAME="burnoutinhos-db"
-DB_PASSWORD="Bur@N0utinhos!#"
+DB_PASSWORD="Bur@N0utinhos!#" # Senha definida pelo usuário
 SERVER_NAME="sql-server-burnoutinhos-eastus2"
 
 GITHUB_REPO_NAME="burnoutinhos/burnoutinhos"
 BRANCH="main"
 APP_INSIGHTS_NAME="ai-burnoutinhos-api"
+
+# Variáveis do Event Hubs
+EVENTHUBS_NAMESPACE="evh-ns-burnoutinhos"
+EVENTHUB_NAME="burnoutinhos-events"
+EVENTHUBS_RG_NAME=$RESOURCE_GROUP_NAME # Usaremos o mesmo RG do App Service
+EVENTHUBS_SKU="Basic" # Basic, Standard, Premium
 
 # ============================
 # PROVIDERS E EXTENSÕES (Geralmente seguros para rodar sempre)
@@ -28,6 +34,7 @@ az provider register --namespace Microsoft.Insights
 az provider register --namespace Microsoft.OperationalInsights
 az provider register --namespace Microsoft.ServiceLinker
 az provider register --namespace Microsoft.Sql
+az provider register --namespace Microsoft.EventHub
 
 az extension add --name application-insights || true
 
@@ -36,15 +43,15 @@ az extension add --name application-insights || true
 # ============================
 
 # Verificar e criar RG do banco de dados
-if [ $(az group show --name $RG_DB_NAME --query name -o tsv) ]; then
+if [ -n "$(az group show --name $RG_DB_NAME --query name -o tsv)" ]; then
   echo "Grupo de recursos $RG_DB_NAME já existe. Pulando a criação."
 else
   echo "Criando grupo de recursos $RG_DB_NAME..."
   az group create --name $RG_DB_NAME --location eastus2
 fi
 
-# Verificar e criar RG do App
-if [ $(az group show --name $RESOURCE_GROUP_NAME --query name -o tsv) ]; then
+# Verificar e criar RG do App/EventHubs
+if [ -n "$(az group show --name $RESOURCE_GROUP_NAME --query name -o tsv)" ]; then
   echo "Grupo de recursos $RESOURCE_GROUP_NAME já existe. Pulando a criação."
 else
   echo "Criando grupo de recursos $RESOURCE_GROUP_NAME..."
@@ -57,7 +64,7 @@ fi
 # ============================
 
 # Verificar e criar SQL Server
-if [ $(az sql server show --name $SERVER_NAME --resource-group $RG_DB_NAME --query name -o tsv) ]; then
+if [ -n "$(az sql server show --name $SERVER_NAME --resource-group $RG_DB_NAME --query name -o tsv)" ]; then
   echo "SQL Server $SERVER_NAME já existe. Pulando a criação."
 else
   echo "Criando SQL Server $SERVER_NAME..."
@@ -70,9 +77,8 @@ else
     --enable-public-network true
 fi
 
-# Verificar e criar SQL DB (Este comando é idempotente, então pode ser rodado sempre ou verificado)
-# Vamos verificar para seguir o padrão
-if [ $(az sql db show --name $DB_NAME --server $SERVER_NAME --resource-group $RG_DB_NAME --query name -o tsv) ]; then
+# Verificar e criar SQL DB
+if [ -n "$(az sql db show --name $DB_NAME --server $SERVER_NAME --resource-group $RG_DB_NAME --query name -o tsv)" ]; then
     echo "Banco de dados $DB_NAME já existe. Pulando a criação."
 else
     echo "Criando banco de dados $DB_NAME..."
@@ -84,7 +90,6 @@ else
       --backup-storage-redundancy Local \
       --zone-redundant false
 fi
-
 
 # Liberar firewall (apenas testes!) - Este comando é idempotente para a mesma regra
 az sql server firewall-rule create \
@@ -99,7 +104,7 @@ az sql server firewall-rule create \
 # ============================
 
 # Verificar e criar App Insights
-if [ $(az monitor app-insights component show --app $APP_INSIGHTS_NAME --resource-group $RESOURCE_GROUP_NAME --query name -o tsv) ]; then
+if [ -n "$(az monitor app-insights component show --app $APP_INSIGHTS_NAME --resource-group $RESOURCE_GROUP_NAME --query name -o tsv)" ]; then
     echo "Application Insights $APP_INSIGHTS_NAME já existe. Pulando a criação."
 else
     echo "Criando Application Insights $APP_INSIGHTS_NAME..."
@@ -117,11 +122,48 @@ CONNECTION_STRING=$(az monitor app-insights component show \
   --output tsv)
 
 # ============================
+# AZURE EVENT HUBS
+# ============================
+
+# Verificar e criar Event Hubs Namespace
+if [ -n "$(az eventhubs namespace show --name $EVENTHUBS_NAMESPACE --resource-group $EVENTHUBS_RG_NAME --query name -o tsv)" ]; then
+    echo "Event Hubs Namespace $EVENTHUBS_NAMESPACE já existe. Pulando a criação."
+else
+    echo "Criando Event Hubs Namespace $EVENTHUBS_NAMESPACE..."
+    az eventhubs namespace create \
+        --name $EVENTHUBS_NAMESPACE \
+        --resource-group $EVENTHUBS_RG_NAME \
+        --location "$LOCATION" \
+        --sku $EVENTHUBS_SKU
+fi
+
+# Verificar e criar Event Hub (Tópico)
+if [ -n "$(az eventhubs eventhub show --name $EVENTHUB_NAME --namespace-name $EVENTHUBS_NAMESPACE --resource-group $EVENTHUBS_RG_NAME --query name -o tsv)" ]; then
+    echo "Event Hub $EVENTHUB_NAME já existe. Pulando a criação."
+else
+    echo "Criando Event Hub $EVENTHUB_NAME..."
+    az eventhubs eventhub create \
+        --name $EVENTHUB_NAME \
+        --namespace-name $EVENTHUBS_NAMESPACE \
+        --resource-group $EVENTHUBS_RG_NAME \
+        --partition-count 2 \
+        --message-retention-in-days 1
+fi
+
+# Obter a Connection String primária para o App Service
+EVENTHUBS_CS=$(az eventhubs namespace authorization-rule list \
+    --resource-group $EVENTHUBS_RG_NAME \
+    --namespace-name $EVENTHUBS_NAMESPACE \
+    --query "[?name == 'RootManageSharedAccessKey'].primaryConnectionString" \
+    --output tsv)
+
+
+# ============================
 # APP SERVICE PLAN + WEBAPP
 # ============================
 
 # Verificar e criar App Service Plan
-if [ $(az appservice plan show --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP_NAME --query name -o tsv) ]; then
+if [ -n "$(az appservice plan show --name $APP_SERVICE_PLAN --resource-group $RESOURCE_GROUP_NAME --query name -o tsv)" ]; then
     echo "App Service Plan $APP_SERVICE_PLAN já existe. Pulando a criação."
 else
     echo "Criando App Service Plan $APP_SERVICE_PLAN..."
@@ -135,7 +177,7 @@ fi
 
 
 # Verificar e criar Web App
-if [ $(az webapp show --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --query name -o tsv) ]; then
+if [ -n "$(az webapp show --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME --query name -o tsv)" ]; then
     echo "Web App $WEBAPP_NAME já existe. Pulando a criação."
 else
     echo "Criando Web App $WEBAPP_NAME..."
@@ -159,7 +201,7 @@ az resource update \
 # ============================
 # CONFIGURAR VARIÁVEIS DO APP (Idempotente - sempre sobrescreve)
 # ============================
-echo "Configurando variáveis de ambiente do Web App..."
+echo "Configurando variáveis de ambiente do Web App, incluindo Event Hubs..."
 SPRING_DATASOURCE_URL="jdbc:sqlserver://$SERVER_NAME.database.windows.net:1433;database=$DB_NAME"
 
 az webapp config appsettings set \
@@ -172,7 +214,10 @@ az webapp config appsettings set \
     XDT_MicrosoftApplicationInsights_PreemptSdk="1" \
     SPRING_DATASOURCE_USERNAME=$DB_USERNAME \
     SPRING_DATASOURCE_PASSWORD=$DB_PASSWORD \
-    SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+    SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL \
+    # Variáveis para o Event Hubs (usadas pela dependência Spring Cloud Azure)
+    AZURE_EVENTHUBS_CONNECTION_STRING="$EVENTHUBS_CS" \
+    AZURE_EVENTHUBS_EVENTHUB_NAME="$EVENTHUB_NAME"
 
 # Reiniciar o Web App (idempotente/seguro)
 az webapp restart --name $WEBAPP_NAME --resource-group $RESOURCE_GROUP_NAME
@@ -182,6 +227,5 @@ az monitor app-insights component connect-webapp \
     --app $APP_INSIGHTS_NAME \
     --web-app $WEBAPP_NAME \
     --resource-group $RESOURCE_GROUP_NAME
-
 
 echo "✅ Script de configuração/verificação concluído com sucesso!"

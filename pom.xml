@@ -44,6 +44,13 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Azure Event Hubs (Kafka Spring Client) -->
+        <dependency>
+            <groupId>com.azure.spring</groupId>
+            <artifactId>spring-cloud-azure-starter-eventhubs</artifactId>
+            <version>5.14.0</version>
+        </dependency>
+
         <!-- JWT Dependencies -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -138,5 +145,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
