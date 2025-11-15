@@ -37,6 +37,7 @@ public class Analytics {
     @JsonIgnore
     private AppUser user;
 
+    @Column(name = "metric_value")
     private String value;
 
     @Enumerated(EnumType.STRING)
