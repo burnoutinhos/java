@@ -11,6 +11,7 @@
         <version>3.4.0</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
+
     <groupId>com.burnoutinhos</groupId>
     <artifactId>burnoutinhos-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -20,9 +21,26 @@
     <properties>
         <java.version>21</java.version>
         <lombok.version>1.18.34</lombok.version>
+        <azure-messaging-eventhubs.version
+        >5.18.7</azure-messaging-eventhubs.version>
+        <azure-eventhubs-checkpointstore.version
+        >1.19.4</azure-eventhubs-checkpointstore.version>
+        <spring-ai.version>1.0.0-M3</spring-ai.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>spring-milestones</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/milestone</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
+        <!-- Spring Boot Starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -44,11 +62,32 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Azure Event Hubs (Kafka Spring Client) -->
+        <!-- dotent -->
+
         <dependency>
-            <groupId>com.azure.spring</groupId>
-            <artifactId>spring-cloud-azure-starter-eventhubs</artifactId>
-            <version>5.14.0</version>
+          <groupId>me.paulschwarz</groupId>
+          <artifactId>spring-dotenv</artifactId>
+          <version>4.0.0</version>
+        </dependency>
+
+
+        <!-- Azure Event Hubs Dependencies -->
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-messaging-eventhubs</artifactId>
+            <version>${azure-messaging-eventhubs.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId
+            >azure-messaging-eventhubs-checkpointstore-blob</artifactId>
+            <version>${azure-eventhubs-checkpointstore.version}</version>
+        </dependency>
+
+        <!-- Spring AI - OpenAI -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
         </dependency>
 
         <!-- JWT Dependencies -->
@@ -74,7 +113,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.6.0</version>
+            <version>2.7.0</version>
         </dependency>
 
         <!-- Lombok -->
@@ -128,6 +167,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.ai</groupId>
+                <artifactId>spring-ai-bom</artifactId>
+                <version>${spring-ai.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

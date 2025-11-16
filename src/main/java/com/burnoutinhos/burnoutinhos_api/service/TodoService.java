@@ -5,8 +5,11 @@ import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.Todo;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.TodoDTO;
+import com.burnoutinhos.burnoutinhos_api.model.dtos.TodoEventDTO;
 import com.burnoutinhos.burnoutinhos_api.repository.TodoRepository;
+import com.burnoutinhos.burnoutinhos_api.service.messagery.EventHubProducerService;
 import java.util.List;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -19,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
  * para extrair o usuário do token quando necessário.
  */
 @Service
+@Log4j2
 public class TodoService {
 
     @Autowired
@@ -26,6 +30,9 @@ public class TodoService {
 
     @Autowired
     private SuggestionService suggestionService;
+
+    @Autowired
+    private EventHubProducerService eventHubProducerService;
 
     /**
      * Persiste uma entidade {@link Todo}.
@@ -37,7 +44,22 @@ public class TodoService {
             AppUser user = AuthenticationUtil.extractUserFromToken();
             todo.setUser(user);
         }
-        return repository.save(todo);
+
+        Todo savedTodo = repository.save(todo);
+        log.info("Todo salvo com ID: {}", savedTodo.getId());
+
+        try {
+            TodoEventDTO eventDTO = TodoEventDTO.fromTodo(savedTodo);
+            eventHubProducerService.publishTodoEvent(eventDTO);
+            log.info("Evento de Todo publicado para geração de sugestão");
+        } catch (Exception e) {
+            log.error(
+                "Erro ao publicar evento, mas todo foi salvo: {}",
+                e.getMessage()
+            );
+        }
+
+        return savedTodo;
     }
 
     /**
