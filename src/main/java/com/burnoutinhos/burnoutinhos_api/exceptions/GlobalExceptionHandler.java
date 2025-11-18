@@ -1,5 +1,7 @@
 package com.burnoutinhos.burnoutinhos_api.exceptions;
 
+import com.burnoutinhos.burnoutinhos_api.model.dtos.ErrorResponseDTO;
+import com.burnoutinhos.burnoutinhos_api.model.dtos.FieldErrorResponseDTO;
 import io.jsonwebtoken.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -73,19 +75,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<?> handleValidationExceptions(
+    public ResponseEntity<ErrorResponseDTO> handleValidationExceptions(
         BadRequestException ex
     ) {
-        List<Map<String, String>> errors = new ArrayList<>();
+        List<FieldErrorResponseDTO> errors = new ArrayList<>();
         for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
-            Map<String, String> e = new HashMap<>();
-            e.put("field", fe.getField());
-            e.put("message", fe.getDefaultMessage());
-            errors.add(e);
+            errors.add(
+                new FieldErrorResponseDTO(fe.getField(), fe.getDefaultMessage())
+            );
         }
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", 400);
-        body.put("errors", errors);
-        return ResponseEntity.badRequest().body(body);
+        return ResponseEntity.badRequest().body(
+            new ErrorResponseDTO(400, ex.getMessage(), errors)
+        );
     }
 }

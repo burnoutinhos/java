@@ -18,6 +18,7 @@ public class TimeBlockDTO {
     private String name;
 
     private Integer timeCount;
+
     private TimeBlockType type;
 
     @Nullable

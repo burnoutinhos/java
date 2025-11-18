@@ -5,6 +5,7 @@ import com.burnoutinhos.burnoutinhos_api.model.TimeBlock;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.TimeBlockDTO;
 import com.burnoutinhos.burnoutinhos_api.service.TimeBlockService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -44,12 +46,21 @@ public class TimeBlockController {
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "201", description = "Criado"),
+            @ApiResponse(
+                responseCode = "201",
+                description = "Bloco de tempo criado com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
             @ApiResponse(
                 responseCode = "400",
-                description = "Requisição inválida"
+                description = "Requisição inválida - dados de entrada incorretos",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
             ),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @PostMapping
@@ -77,9 +88,20 @@ public class TimeBlockController {
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "204", description = "Nenhum conteúdo"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de blocos de tempo retornada com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Nenhum bloco de tempo encontrado"
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @GetMapping
@@ -97,9 +119,21 @@ public class TimeBlockController {
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "Encontrado"),
-            @ApiResponse(responseCode = "404", description = "Não encontrado"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Bloco de tempo encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Bloco de tempo não encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @GetMapping("/{id}")
@@ -114,13 +148,26 @@ public class TimeBlockController {
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "Atualizado"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Bloco de tempo atualizado com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
             @ApiResponse(
                 responseCode = "400",
-                description = "Requisição inválida"
+                description = "Requisição inválida - dados de entrada incorretos",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
             ),
-            @ApiResponse(responseCode = "404", description = "Não encontrado"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Bloco de tempo não encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @PutMapping("/{id}")
@@ -150,9 +197,20 @@ public class TimeBlockController {
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "204", description = "Removido"),
-            @ApiResponse(responseCode = "404", description = "Não encontrado"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Bloco de tempo removido com sucesso"
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Bloco de tempo não encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @DeleteMapping("/{id}")

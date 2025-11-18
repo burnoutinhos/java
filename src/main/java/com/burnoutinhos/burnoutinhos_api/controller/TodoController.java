@@ -5,6 +5,7 @@ import com.burnoutinhos.burnoutinhos_api.model.Todo;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.TodoDTO;
 import com.burnoutinhos.burnoutinhos_api.service.TodoService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,12 +38,27 @@ public class TodoController {
     @Autowired
     private TodoService service;
 
-    @Operation(summary = "Create todo", description = "Creates a new Todo")
+    @Operation(
+        summary = "Criar tarefa",
+        description = "Cria uma nova tarefa (todo)"
+    )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "201", description = "Created"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(
+                responseCode = "201",
+                description = "Tarefa criada com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Requisição inválida - dados de entrada incorretos",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @PostMapping
@@ -63,12 +80,26 @@ public class TodoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    @Operation(summary = "List todos", description = "Returns all Todos")
+    @Operation(
+        summary = "Listar tarefas",
+        description = "Retorna todas as tarefas cadastradas"
+    )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "204", description = "No content"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de tarefas retornada com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Nenhuma tarefa encontrada"
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @GetMapping
@@ -81,14 +112,26 @@ public class TodoController {
     }
 
     @Operation(
-        summary = "Get todo by ID",
-        description = "Returns a Todo by its ID"
+        summary = "Buscar tarefa por ID",
+        description = "Retorna uma tarefa específica pelo seu ID"
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "Found"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Tarefa encontrada",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Tarefa não encontrada",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @GetMapping("/{id}")
@@ -98,15 +141,31 @@ public class TodoController {
     }
 
     @Operation(
-        summary = "Update todo",
-        description = "Updates an existing Todo"
+        summary = "Atualizar tarefa",
+        description = "Atualiza uma tarefa existente"
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "Updated"),
-            @ApiResponse(responseCode = "400", description = "Invalid request"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Tarefa atualizada com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Requisição inválida - dados de entrada incorretos",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Tarefa não encontrada",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @PutMapping("/{id}")
@@ -126,12 +185,26 @@ public class TodoController {
         return ResponseEntity.ok(updated);
     }
 
-    @Operation(summary = "Delete todo", description = "Deletes a Todo by ID")
+    @Operation(
+        summary = "Deletar tarefa",
+        description = "Remove uma tarefa pelo seu ID"
+    )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "204", description = "Deleted"),
-            @ApiResponse(responseCode = "404", description = "Not found"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Tarefa removida com sucesso"
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Tarefa não encontrada",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @DeleteMapping("/{id}")

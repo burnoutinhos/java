@@ -5,9 +5,11 @@ import com.azure.messaging.eventhubs.EventHubConsumerAsyncClient;
 import com.azure.messaging.eventhubs.models.EventPosition;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.Suggestion;
+import com.burnoutinhos.burnoutinhos_api.model.Todo;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.TodoEventDTO;
 import com.burnoutinhos.burnoutinhos_api.service.AppUserService;
 import com.burnoutinhos.burnoutinhos_api.service.SuggestionService;
+import com.burnoutinhos.burnoutinhos_api.service.TodoService;
 import com.burnoutinhos.burnoutinhos_api.service.ai.OpenAIService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -51,6 +53,9 @@ public class EventHubConsumerService {
 
     @Autowired
     private AppUserService appUserService;
+
+    @Autowired
+    private TodoService todoService;
 
     private final ObjectMapper objectMapper;
     private EventHubConsumerAsyncClient consumerClient;
@@ -124,6 +129,15 @@ public class EventHubConsumerService {
                                         todoEvent.getUserId()
                                     );
                                     suggestion.setUser(user);
+                                }
+
+                                // Se o evento tiver um todoId, vincula ao Todo para manter relação
+                                if (todoEvent.getId() != null) {
+                                    Todo todo = todoService.findById(
+                                        todoEvent.getId()
+                                    );
+                                    suggestion.setTodo(todo);
+                                    // a SuggestionService.save vai adicionar a suggestion na lista do todo
                                 }
 
                                 suggestionService.save(suggestion);

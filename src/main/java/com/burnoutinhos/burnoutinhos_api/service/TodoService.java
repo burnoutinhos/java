@@ -29,9 +29,6 @@ public class TodoService {
     private TodoRepository repository;
 
     @Autowired
-    private SuggestionService suggestionService;
-
-    @Autowired
     private EventHubProducerService eventHubProducerService;
 
     /**
@@ -103,12 +100,6 @@ public class TodoService {
     public Todo update(TodoDTO dto, Long id) {
         Todo todo = findById(id);
         BeanUtils.copyProperties(dto, todo);
-
-        if (dto.getSuggestionId() != null) {
-            todo.setSuggestion(
-                suggestionService.findById(dto.getSuggestionId())
-            );
-        }
 
         if (id == null || !repository.existsById(id)) {
             throw new ResourceNotFoundException("Todo not found");

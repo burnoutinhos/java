@@ -12,5 +12,6 @@ import lombok.Setter;
 public class AuthResponseDTO {
 
     String token;
+
     String message;
 }

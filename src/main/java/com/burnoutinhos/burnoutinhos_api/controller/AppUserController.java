@@ -8,6 +8,7 @@ import com.burnoutinhos.burnoutinhos_api.model.dtos.RegisterAndUpdateUserDTO;
 import com.burnoutinhos.burnoutinhos_api.service.AppUserService;
 import com.burnoutinhos.burnoutinhos_api.service.auth.AuthenticationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,7 +17,9 @@ import java.util.List;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,17 +40,7 @@ public class AppUserController {
 
     @Operation(
         summary = "Registrar usuário",
-        description = "Registra um novo usuário"
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(responseCode = "201", description = "Usuário criado"),
-            @ApiResponse(
-                responseCode = "400",
-                description = "Requisição inválida"
-            ),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
-        }
+        description = "Registra um novo usuário no sistema e retorna um token JWT"
     )
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(
@@ -68,18 +61,24 @@ public class AppUserController {
 
     @Operation(
         summary = "Login de usuário",
-        description = "Autentica um usuário"
+        description = "Autentica um usuário e retorna um token JWT"
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "Autenticado"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Autenticado com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
             @ApiResponse(
                 responseCode = "400",
-                description = "Requisição inválida"
+                description = "Requisição inválida - dados de entrada incorretos",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
             ),
             @ApiResponse(
                 responseCode = "401",
-                description = "Credenciais inválidas"
+                description = "Credenciais inválidas",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
             ),
         }
     )
@@ -98,13 +97,24 @@ public class AppUserController {
 
     @Operation(
         summary = "Listar usuários",
-        description = "Retorna todos os usuários"
+        description = "Retorna todos os usuários cadastrados no sistema"
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "204", description = "Nenhum conteúdo"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de usuários retornada com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Nenhum usuário encontrado"
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @GetMapping
@@ -118,13 +128,25 @@ public class AppUserController {
 
     @Operation(
         summary = "Buscar usuário por ID",
-        description = "Retorna um usuário pelo ID"
+        description = "Retorna um usuário específico pelo seu ID"
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Não encontrado"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Usuário encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Usuário não encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @GetMapping("/{id}")
@@ -134,18 +156,56 @@ public class AppUserController {
     }
 
     @Operation(
+        summary = "Buscar usuário autenticado",
+        description = "Retorna os dados do usuário atualmente autenticado"
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Dados do usuário retornados",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+        }
+    )
+    @GetMapping("/me")
+    public ResponseEntity<AppUser> findMe(
+        @AuthenticationPrincipal AppUser user
+    ) {
+        return ResponseEntity.ok(user);
+    }
+
+    @Operation(
         summary = "Atualizar usuário",
         description = "Atualiza os dados de um usuário existente"
     )
     @ApiResponses(
         {
-            @ApiResponse(responseCode = "200", description = "Atualizado"),
+            @ApiResponse(
+                responseCode = "200",
+                description = "Usuário atualizado com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
             @ApiResponse(
                 responseCode = "400",
-                description = "Requisição inválida"
+                description = "Requisição inválida - dados de entrada incorretos",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
             ),
-            @ApiResponse(responseCode = "404", description = "Não encontrado"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Usuário não encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @PutMapping
@@ -165,16 +225,24 @@ public class AppUserController {
 
     @Operation(
         summary = "Deletar usuário",
-        description = "Remove um usuário pelo ID"
+        description = "Remove um usuário do sistema pelo seu ID"
     )
     @ApiResponses(
         {
             @ApiResponse(
                 responseCode = "204",
-                description = "Removido com sucesso"
+                description = "Usuário removido com sucesso"
             ),
-            @ApiResponse(responseCode = "404", description = "Não encontrado"),
-            @ApiResponse(responseCode = "401", description = "Não autorizado"),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Usuário não encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
         }
     )
     @DeleteMapping("/{id}")

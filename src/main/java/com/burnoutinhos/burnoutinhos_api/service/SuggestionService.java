@@ -4,6 +4,7 @@ import com.burnoutinhos.burnoutinhos_api.config.AuthenticationUtil;
 import com.burnoutinhos.burnoutinhos_api.exceptions.ResourceNotFoundException;
 import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.Suggestion;
+import com.burnoutinhos.burnoutinhos_api.model.Todo;
 import com.burnoutinhos.burnoutinhos_api.repository.SuggestionRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ public class SuggestionService {
     @Autowired
     private SuggestionRepository repository;
 
+    @Autowired
+    private TodoService todoService;
+
     /**
      * Persiste uma entidade {@link Suggestion}.
      * Se o usuário não estiver presente, extrai o userId do token autenticado.
@@ -30,6 +34,23 @@ public class SuggestionService {
             AppUser user = AuthenticationUtil.extractUserFromToken();
             suggestion.setUser(user);
         }
+
+        // Se a suggestion vier com um todo (ou ao menos o todo.id), carregue o Todo
+        if (
+            suggestion.getTodo() != null && suggestion.getTodo().getId() != null
+        ) {
+            Long todoId = suggestion.getTodo().getId();
+            Todo todo = todoService.findById(todoId); // lança ResourceNotFoundException se não existir
+
+            // seta a entidade gerenciada no lado Many
+            suggestion.setTodo(todo);
+
+            // Mantém a coleção do Todo atualizada (evita inconsistência no contexto de persistência)
+            if (!todo.getSuggestions().contains(suggestion)) {
+                todo.getSuggestions().add(suggestion);
+            }
+        }
+
         return repository.save(suggestion);
     }
 
@@ -82,6 +103,18 @@ public class SuggestionService {
         if (suggestion.getUser() == null) {
             AppUser user = AuthenticationUtil.extractUserFromToken();
             suggestion.setUser(user);
+        }
+
+        // Mesma lógica: se veio um todo.id, carrega e associa
+        if (
+            suggestion.getTodo() != null && suggestion.getTodo().getId() != null
+        ) {
+            Long todoId = suggestion.getTodo().getId();
+            Todo todo = todoService.findById(todoId);
+            suggestion.setTodo(todo);
+            if (!todo.getSuggestions().contains(suggestion)) {
+                todo.getSuggestions().add(suggestion);
+            }
         }
 
         return repository.save(suggestion);

@@ -19,6 +19,7 @@ public class TodoDTO {
     private String name;
 
     private LocalDateTime start;
+
     private LocalDateTime end;
 
     @Nullable
