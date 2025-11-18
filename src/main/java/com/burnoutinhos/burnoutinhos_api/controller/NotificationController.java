@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -38,32 +39,32 @@ public class NotificationController {
     @Autowired
     private NotificationService service;
 
-    // @Operation(
-    //     summary = "Create notification",
-    //     description = "Creates a new notification"
-    // )
-    // @ApiResponses(
-    //     {
-    //         @ApiResponse(responseCode = "201", description = "Created"),
-    //         @ApiResponse(responseCode = "400", description = "Invalid request"),
-    //         @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    //     }
-    // )
-    // @PostMapping
-    // public ResponseEntity<Notification> create(
-    //     @Valid @RequestBody Notification notification,
-    //     BindingResult bindingResult
-    // ) {
-    //     if (bindingResult.hasErrors()) {
-    //         throw new BadRequestException(
-    //             "Create notification not valid",
-    //             bindingResult
-    //         );
-    //     }
+    @Operation(
+        summary = "Create notification",
+        description = "Creates a new notification"
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(responseCode = "201", description = "Created"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        }
+    )
+    @PostMapping
+    public ResponseEntity<Notification> create(
+        @Valid @RequestBody Notification notification,
+        BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            throw new BadRequestException(
+                "Create notification not valid",
+                bindingResult
+            );
+        }
 
-    //     Notification saved = service.save(notification);
-    //     return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-    // }
+        Notification saved = service.save(notification);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
 
     @Operation(
         summary = "Listar notificações",
