@@ -1,6 +1,7 @@
 package com.burnoutinhos.burnoutinhos_api.controller;
 
 import com.burnoutinhos.burnoutinhos_api.exceptions.BadRequestException;
+import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.TimeBlock;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.TimeBlockDTO;
 import com.burnoutinhos.burnoutinhos_api.service.TimeBlockService;
@@ -13,9 +14,11 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -111,6 +115,43 @@ public class TimeBlockController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(list);
+    }
+
+    @Operation(
+        summary = "Buscar time block por ID",
+        description = "Retorna um bloco de tempo pelo seu ID"
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Bloco de tempo encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "404",
+                description = "Bloco de tempo não encontrado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+        }
+    )
+    @GetMapping("/me")
+    public ResponseEntity<Page<TimeBlock>> findAllByUser(
+        @AuthenticationPrincipal AppUser user,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<TimeBlock> pageResult = service.findAllByUserId(
+            user.getId(),
+            page,
+            size
+        );
+        return ResponseEntity.ok(pageResult);
     }
 
     @Operation(

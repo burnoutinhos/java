@@ -9,6 +9,8 @@ import com.burnoutinhos.burnoutinhos_api.repository.SuggestionRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -62,6 +64,12 @@ public class SuggestionService {
     @Cacheable("suggestions")
     public List<Suggestion> findAll() {
         return repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "suggestions", key = "#userId + '-' + #page + '-' + #size")
+    public Page<Suggestion> findAllByUserId(Long userId, Integer page, Integer size) {
+        return repository.findByUserId(userId, PageRequest.of(page, size));
     }
 
     /**

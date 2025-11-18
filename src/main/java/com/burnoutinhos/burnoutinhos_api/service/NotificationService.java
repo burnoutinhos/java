@@ -8,6 +8,8 @@ import com.burnoutinhos.burnoutinhos_api.repository.NotificationRepository;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +43,12 @@ public class NotificationService {
     @Cacheable("notifications")
     public List<Notification> findAll() {
         return repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "notifications", key = "#userId + '_' + #page + '_' + #size")
+    public Page<Notification> findAll(Long userId, Integer page, Integer size) {
+        return repository.findByUserId(userId, PageRequest.of(page, size));
     }
 
     /**

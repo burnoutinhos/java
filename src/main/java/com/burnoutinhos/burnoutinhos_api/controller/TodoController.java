@@ -1,6 +1,7 @@
 package com.burnoutinhos.burnoutinhos_api.controller;
 
 import com.burnoutinhos.burnoutinhos_api.exceptions.BadRequestException;
+import com.burnoutinhos.burnoutinhos_api.model.AppUser;
 import com.burnoutinhos.burnoutinhos_api.model.Todo;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.TodoDTO;
 import com.burnoutinhos.burnoutinhos_api.service.TodoService;
@@ -13,9 +14,11 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -108,6 +112,35 @@ public class TodoController {
         if (list == null || list.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
+        return ResponseEntity.ok(list);
+    }
+
+    @Operation(
+        summary = "Listar tarefas por usuário",
+        description = "Retorna todas as tarefas cadastradas por um usuário específico"
+    )
+    @ApiResponses(
+        {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de tarefas retornada com sucesso",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+            @ApiResponse(
+                responseCode = "204",
+                description = "Nenhuma tarefa encontrada"
+            ),
+            @ApiResponse(
+                responseCode = "401",
+                description = "Não autorizado",
+                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
+            ),
+        }
+    )
+    @GetMapping("/me")
+    public ResponseEntity<Page<Todo>> findAllByUser(@AuthenticationPrincipal AppUser user, @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
+        Page<Todo> list = service.findAllByUser(user.getId(), page, size);
+
         return ResponseEntity.ok(list);
     }
 

@@ -13,6 +13,8 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +69,12 @@ public class TodoService {
     @Cacheable("todos")
     public List<Todo> findAll() {
         return repository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = "todos", key = "#userId + '_' + #page + '_' + #size")
+    public Page<Todo> findAllByUser(Long userId, Integer page, Integer size) {
+        return repository.findByUserId(userId, PageRequest.of(page, size));
     }
 
     /**
