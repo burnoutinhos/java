@@ -13,7 +13,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -117,6 +121,19 @@ public class AppUserController {
             ),
         }
     )
+
+    @GetMapping("/verify-password")
+    public ResponseEntity<Map<String, Object>> verifyPassword(
+        @AuthenticationPrincipal AppUser user,
+        @RequestParam String password
+    ) {
+        boolean isValid = authService.verifyPassword(user, password);
+        Map<String, Object> response = new HashMap<>();
+        response.put("validPassword", isValid);
+        return ResponseEntity.ok(response);
+    }
+
+
     @GetMapping
     public ResponseEntity<List<AppUser>> findAll() {
         List<AppUser> users = service.findAll();

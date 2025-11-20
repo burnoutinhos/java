@@ -7,12 +7,16 @@ import com.burnoutinhos.burnoutinhos_api.model.dtos.AuthResponseDTO;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.LoginDTO;
 import com.burnoutinhos.burnoutinhos_api.model.dtos.RegisterAndUpdateUserDTO;
 import com.burnoutinhos.burnoutinhos_api.service.AppUserService;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,22 +29,13 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Log4j2
+@RequiredArgsConstructor
 public class AuthenticationService {
 
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final AppUserService appUserService;
-
-    @Autowired
-    public AuthenticationService(
-        AuthenticationManager authenticationManager,
-        JWTUtil jwtUtil,
-        AppUserService appUserService
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
-        this.appUserService = appUserService;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * Autentica um usuário com as credenciais fornecidas e, em caso de sucesso,
@@ -118,5 +113,14 @@ public class AuthenticationService {
         );
         AuthResponseDTO result = login(loginDto);
         return result;
+    }
+
+    @Transactional(readOnly = true)
+    public boolean verifyPassword(
+        AppUser user,
+        String password
+    ) {
+        boolean isValid = passwordEncoder.matches(password, user.getPassword());
+        return isValid;
     }
 }
