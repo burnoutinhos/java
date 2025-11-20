@@ -119,34 +119,6 @@ public class NotificationController {
     }
 
     @Operation(
-        summary = "Listar notificações por usuário",
-        description = "Retorna todas as notificações de um usuário"
-    )
-    @ApiResponses(
-        {
-            @ApiResponse(
-                responseCode = "200",
-                description = "Lista retornada com sucesso",
-                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
-            ),
-            @ApiResponse(
-                responseCode = "204",
-                description = "Nenhuma notificação encontrada"
-            ),
-            @ApiResponse(
-                responseCode = "401",
-                description = "Não autorizado",
-                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
-            ),
-        }
-    )
-    @GetMapping("/me")
-    public ResponseEntity<Page<Notification>> findAllByUser(@AuthenticationPrincipal AppUser user, @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
-        Page<Notification> list = service.findAll(user.getId(), page, size);
-        return ResponseEntity.ok(list);
-    }
-
-    @Operation(
         summary = "Buscar notificação por ID",
         description = "Retorna uma notificação pelo seu ID"
     )

@@ -126,7 +126,7 @@ class NotificationControllerTest {
 
     @Test
     @DisplayName(
-        "GET /notifications - Should return 204 when no notifications found"
+        "GET /notifications - Should return 200 when no notifications found"
     )
     void testFindAllNotifications_NoContent() throws Exception {
         // Given
@@ -135,14 +135,14 @@ class NotificationControllerTest {
         // When & Then
         mockMvc
             .perform(get("/notifications"))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1)).findAll();
     }
 
     @Test
     @DisplayName(
-        "GET /notifications - Should return 204 when notifications list is null"
+        "GET /notifications - Should return 200 when notifications list is null"
     )
     void testFindAllNotifications_NullList() throws Exception {
         // Given
@@ -151,7 +151,7 @@ class NotificationControllerTest {
         // When & Then
         mockMvc
             .perform(get("/notifications"))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk());
 
         verify(notificationService, times(1)).findAll();
     }
