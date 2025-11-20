@@ -111,8 +111,8 @@ public class AppUserController {
                 content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)
             ),
             @ApiResponse(
-                responseCode = "204",
-                description = "Nenhum usuário encontrado"
+                responseCode = "400",
+                description = "Senha inválida"
             ),
             @ApiResponse(
                 responseCode = "401",
@@ -130,6 +130,9 @@ public class AppUserController {
         boolean isValid = authService.verifyPassword(user, password);
         Map<String, Object> response = new HashMap<>();
         response.put("validPassword", isValid);
+        if (!isValid) {
+            return ResponseEntity.badRequest().body(response);
+        }
         return ResponseEntity.ok(response);
     }
 
