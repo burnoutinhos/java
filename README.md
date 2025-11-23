@@ -7,3 +7,11 @@ No backend, o Burnoutinhos utiliza **Java com Spring Boot** integrado ao **Sprin
 Ao adotar uma arquitetura sólida em **Java + Spring Boot**, a solução oferece alta performance, segurança e escalabilidade. A integração nativa com o Spring AI permite expandir facilmente as capacidades inteligentes do app conforme a necessidade. O Burnoutinhos proporciona uma rotina mais organizada, melhor gestão do tempo e suporte personalizado alimentado por IA, além de contar com uma base backend consistente e preparada para evoluções futuras.
 
 [Vídeo](https://youtu.be/LRxv2RVKtBg)
+
+## 🧑‍💻 Integrantes do Projeto
+
+| Nome                          | RM       |
+|------------------------------|----------|
+| Gustavo Dias da Silva Cruz   | RM556448 |
+| Felipe Ribeiro Tardochi da Silva | RM555100 |
+| Júlia Medeiros Angelozi      | RM556364 |
