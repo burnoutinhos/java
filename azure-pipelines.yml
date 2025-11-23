@@ -23,6 +23,17 @@ steps:
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
+- task: SqlAzureDacpacDeployment@1
+  inputs:
+    azureSubscription: 'SQL Connection Script'
+    AuthenticationType: 'server'
+    ServerName: '$(DB_SERVER)'
+    DatabaseName: '$(DB_NAME)'
+    SqlUsername: '$(DB_USERNAME)'
+    SqlPassword: '$(DB_PASSWORD)'
+    deployType: 'SqlTask'
+    SqlFile: 'scripts/script-bd.sql'
+    IpDetectionMethod: 'AutoDetect'
 - task: Maven@4
   inputs:
     azureSubscription: 'Azure for Students(8f55ccac-5075-4334-ace5-1efd09027f00)'
