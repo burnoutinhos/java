@@ -140,7 +140,6 @@ public class TodoController {
     @GetMapping("/me")
     public ResponseEntity<Page<Todo>> findAllByUser(@AuthenticationPrincipal AppUser user, @RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size) {
         Page<Todo> list = service.findAllByUser(user.getId(), page, size);
-
         return ResponseEntity.ok(list);
     }
 

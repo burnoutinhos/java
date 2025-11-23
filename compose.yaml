@@ -1,9 +1,30 @@
 services:
   sqlserver:
     image: 'mcr.microsoft.com/mssql/server:latest'
+    container_name: burnoutinhos-sqlserver
     environment:
       - 'ACCEPT_EULA=yes'
-      - 'MSSQL_PID=express'
+      - 'MSSQL_PID=Express'
+      - 'SA_PASSWORD=verYs3cret'
       - 'MSSQL_SA_PASSWORD=verYs3cret'
     ports:
-      - '1433'
+      - '1433:1433'
+    volumes:
+      - ./scripts:/scripts
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - burnoutinhos-network
+
+volumes:
+  sqlserver-data:
+    driver: local
+
+networks:
+  burnoutinhos-network:
+    driver: bridge

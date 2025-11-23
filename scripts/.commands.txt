@@ -1,0 +1,162 @@
+# ============================================
+# COMANDOS ÚTEIS - BANCO DE DADOS
+# Burnoutinhos API
+# ============================================
+
+# ============================================
+# INICIALIZAÇÃO
+# ============================================
+
+# Subir o banco de dados
+docker-compose up -d
+
+# Subir e ver logs em tempo real
+docker-compose up
+
+# Inicializar o banco (após subir o container)
+cd scripts && ./init-db.sh
+
+# Verificar se está tudo OK
+cd scripts && ./verify-db.sh
+
+# ============================================
+# GERENCIAMENTO
+# ============================================
+
+# Parar os containers
+docker-compose down
+
+# Parar e remover volumes (APAGA OS DADOS!)
+docker-compose down -v
+
+# Reiniciar o container
+docker-compose restart
+
+# Ver logs do SQL Server
+docker logs burnoutinhos-sqlserver
+
+# Ver logs em tempo real
+docker logs -f burnoutinhos-sqlserver
+
+# Status dos containers
+docker-compose ps
+
+# ============================================
+# CONEXÃO COM O BANCO
+# ============================================
+
+# Conectar via sqlcmd
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret
+
+# Executar query direta
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -Q "SELECT name FROM sys.databases"
+
+# Conectar no banco burnoutinhos_db
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -d burnoutinhos_db
+
+# ============================================
+# SCRIPTS
+# ============================================
+
+# Executar script SQL manualmente
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -i /scripts/script-bd.sql
+
+# Executar script de inicialização
+cd scripts && ./init-db.sh
+
+# Executar script de verificação
+cd scripts && ./verify-db.sh
+
+# Executar script simples
+cd scripts && ./run-script.sh
+
+# ============================================
+# QUERIES ÚTEIS
+# ============================================
+
+# Listar todos os bancos de dados
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -Q "SELECT name FROM sys.databases"
+
+# Listar todas as tabelas
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -d burnoutinhos_db -Q "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'"
+
+# Contar registros em todas as tabelas
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -d burnoutinhos_db -Q "SELECT t.name, p.rows FROM sys.tables t INNER JOIN sys.partitions p ON t.object_id = p.object_id WHERE p.index_id IN (0,1)"
+
+# Ver estrutura de uma tabela
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -d burnoutinhos_db -Q "SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'app_user'"
+
+# ============================================
+# BACKUP E RESTORE
+# ============================================
+
+# Fazer backup do banco
+docker exec -it burnoutinhos-sqlserver /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P verYs3cret -Q "BACKUP DATABASE burnoutinhos_db TO DISK = '/var/opt/mssql/backup/burnoutinhos_db.bak'"
+
+# Copiar backup para host
+docker cp burnoutinhos-sqlserver:/var/opt/mssql/backup/burnoutinhos_db.bak ./backup/
+
+# ============================================
+# TROUBLESHOOTING
+# ============================================
+
+# Verificar se a porta 1433 está em uso
+sudo lsof -i :1433
+
+# Verificar saúde do container
+docker inspect burnoutinhos-sqlserver | grep -A 10 Health
+
+# Entrar no container
+docker exec -it burnoutinhos-sqlserver /bin/bash
+
+# Verificar espaço em disco do container
+docker exec -it burnoutinhos-sqlserver df -h
+
+# Verificar processos do SQL Server
+docker exec -it burnoutinhos-sqlserver ps aux | grep sql
+
+# ============================================
+# LIMPEZA
+# ============================================
+
+# Remover containers parados
+docker container prune
+
+# Remover volumes não utilizados
+docker volume prune
+
+# Remover tudo relacionado ao compose
+docker-compose down --rmi all --volumes --remove-orphans
+
+# ============================================
+# DESENVOLVIMENTO
+# ============================================
+
+# Ver logs do Spring Boot conectando ao banco
+./mvnw spring-boot:run
+
+# Testar conexão JDBC
+./mvnw test -Dtest=DatabaseConnectionTest
+
+# ============================================
+# INFORMAÇÕES DE CONEXÃO
+# ============================================
+
+# Host: localhost
+# Port: 1433
+# Database: burnoutinhos_db
+# Username: sa
+# Password: verYs3cret
+
+# JDBC URL:
+# jdbc:sqlserver://localhost:1433;databaseName=burnoutinhos_db;encrypt=false
+
+# ============================================
+# USUÁRIO ADMIN PADRÃO
+# ============================================
+
+# Email: admin@burnoutinhos.com
+# Senha: admin123
+# Role: ROLE_ADMIN
+
+# ⚠️ ALTERE A SENHA EM PRODUÇÃO!
