@@ -19,11 +19,10 @@ steps:
     azureSubscription: 'Azure for Students(8f55ccac-5075-4334-ace5-1efd09027f00)'
     scriptType: 'bash'
     scriptLocation: 'scriptPath'
-    scriptPath: 'deploy-infra.sh'
+    scriptPath: '/scripts/script-infra.sh'
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
-
 - task: Maven@4
   inputs:
     azureSubscription: 'Azure for Students(8f55ccac-5075-4334-ace5-1efd09027f00)'
