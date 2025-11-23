@@ -1,18 +1,8 @@
 -- ============================================
--- Script de Criação de Banco de Dados
+-- Script de Criação de Tabelas
 -- Projeto: Burnoutinhos API
 -- Banco: SQL Server
 -- ============================================
-
--- Criar banco de dados se não existir
-IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'burnoutinhos_db')
-BEGIN
-    CREATE DATABASE burnoutinhos_db;
-END
-GO
-
-USE burnoutinhos_db;
-GO
 
 -- ============================================
 -- Tabela: app_user
@@ -28,7 +18,7 @@ BEGIN
         language NVARCHAR(50) CHECK (language IN ('PTBR', 'EN', 'ES')),
         profile_image NVARCHAR(500)
     );
-
+    
     PRINT 'Tabela app_user criada com sucesso.';
 END
 ELSE
@@ -46,12 +36,12 @@ BEGIN
     CREATE TABLE app_user_roles (
         app_user_id BIGINT NOT NULL,
         roles NVARCHAR(255) NOT NULL,
-        CONSTRAINT fk_app_user_roles_user FOREIGN KEY (app_user_id)
+        CONSTRAINT fk_app_user_roles_user FOREIGN KEY (app_user_id) 
             REFERENCES app_user(id) ON DELETE CASCADE
     );
-
+    
     CREATE INDEX idx_app_user_roles_user_id ON app_user_roles(app_user_id);
-
+    
     PRINT 'Tabela app_user_roles criada com sucesso.';
 END
 ELSE
@@ -77,15 +67,15 @@ BEGIN
         user_id BIGINT NOT NULL,
         created_at DATETIME2 DEFAULT GETDATE(),
         updated_at DATETIME2 DEFAULT GETDATE(),
-        CONSTRAINT fk_todo_user FOREIGN KEY (user_id)
+        CONSTRAINT fk_todo_user FOREIGN KEY (user_id) 
             REFERENCES app_user(id) ON DELETE CASCADE
     );
-
+    
     CREATE INDEX idx_todo_user_id ON todo(user_id);
     CREATE INDEX idx_todo_is_completed ON todo(is_completed);
     CREATE INDEX idx_todo_type ON todo(type);
     CREATE INDEX idx_todo_end_time ON todo(end_time);
-
+    
     PRINT 'Tabela todo criada com sucesso.';
 END
 ELSE
@@ -105,13 +95,13 @@ BEGIN
         message NVARCHAR(MAX) NOT NULL,
         user_id BIGINT NOT NULL,
         created_at DATETIME2 DEFAULT GETDATE(),
-        CONSTRAINT fk_notification_user FOREIGN KEY (user_id)
+        CONSTRAINT fk_notification_user FOREIGN KEY (user_id) 
             REFERENCES app_user(id) ON DELETE CASCADE
     );
-
+    
     CREATE INDEX idx_notification_user_id ON notification(user_id);
     CREATE INDEX idx_notification_created_at ON notification(created_at);
-
+    
     PRINT 'Tabela notification criada com sucesso.';
 END
 ELSE
@@ -132,15 +122,15 @@ BEGIN
         todo_id BIGINT,
         user_id BIGINT NOT NULL,
         created_at DATETIME2 DEFAULT GETDATE(),
-        CONSTRAINT fk_suggestion_todo FOREIGN KEY (todo_id)
+        CONSTRAINT fk_suggestion_todo FOREIGN KEY (todo_id) 
             REFERENCES todo(todo_id) ON DELETE CASCADE,
-        CONSTRAINT fk_suggestion_user FOREIGN KEY (user_id)
+        CONSTRAINT fk_suggestion_user FOREIGN KEY (user_id) 
             REFERENCES app_user(id) ON DELETE NO ACTION
     );
-
+    
     CREATE INDEX idx_suggestion_todo_id ON suggestion(todo_id);
     CREATE INDEX idx_suggestion_user_id ON suggestion(user_id);
-
+    
     PRINT 'Tabela suggestion criada com sucesso.';
 END
 ELSE
@@ -166,16 +156,16 @@ BEGIN
         user_id BIGINT NOT NULL,
         created_at DATETIME2 DEFAULT GETDATE(),
         updated_at DATETIME2 DEFAULT GETDATE(),
-        CONSTRAINT fk_time_block_todo FOREIGN KEY (todo_id)
+        CONSTRAINT fk_time_block_todo FOREIGN KEY (todo_id) 
             REFERENCES todo(todo_id) ON DELETE CASCADE,
-        CONSTRAINT fk_time_block_user FOREIGN KEY (user_id)
+        CONSTRAINT fk_time_block_user FOREIGN KEY (user_id) 
             REFERENCES app_user(id) ON DELETE NO ACTION
     );
-
+    
     CREATE INDEX idx_time_block_todo_id ON time_block(todo_id);
     CREATE INDEX idx_time_block_user_id ON time_block(user_id);
     CREATE INDEX idx_time_block_type ON time_block(type);
-
+    
     PRINT 'Tabela time_block criada com sucesso.';
 END
 ELSE
@@ -194,13 +184,13 @@ BEGIN
         id_token_push BIGINT IDENTITY(1,1) PRIMARY KEY,
         token NVARCHAR(500) NOT NULL,
         user_id BIGINT NOT NULL,
-        CONSTRAINT fk_push_token_user FOREIGN KEY (user_id)
+        CONSTRAINT fk_push_token_user FOREIGN KEY (user_id) 
             REFERENCES app_user(id) ON DELETE CASCADE
     );
-
+    
     CREATE INDEX idx_push_token_user_id ON t_gp_mottu_token_push(user_id);
     CREATE INDEX idx_push_token_token ON t_gp_mottu_token_push(token);
-
+    
     PRINT 'Tabela t_gp_mottu_token_push criada com sucesso.';
 END
 ELSE
@@ -227,51 +217,4 @@ BEGIN
     CREATE INDEX idx_notification_user_date ON notification(user_id, created_at DESC);
     PRINT 'Índice idx_notification_user_date criado.';
 END
-GO
-
--- ============================================
--- Dados iniciais (opcional)
--- ============================================
-
--- Inserir usuário admin padrão (se não existir)
-IF NOT EXISTS (SELECT 1 FROM app_user WHERE email = 'admin@burnoutinhos.com')
-BEGIN
-    INSERT INTO app_user (name, email, password, language, profile_image)
-    VALUES (
-        'Administrador',
-        'admin@burnoutinhos.com',
-        '$2a$12$rf6Keiq0xueWMMpt8x4YoOBKfSBtLbF7Tc/OOZLJJ4TYVdmwgNvka', -- senha: admin123 (deve ser criptografada)
-        'PTBR',
-        NULL
-    );
-
-    -- Pegar o ID do usuário recém-criado e adicionar role ADMIN
-    DECLARE @AdminUserId BIGINT = SCOPE_IDENTITY();
-
-    INSERT INTO app_user_roles (app_user_id, roles)
-    VALUES (@AdminUserId, 'ROLE_ADMIN');
-
-    PRINT 'Usuário administrador padrão criado.';
-END
-ELSE
-BEGIN
-    PRINT 'Usuário administrador já existe.';
-END
-GO
-
--- ============================================
--- Verificação final
--- ============================================
-PRINT '';
-PRINT '============================================';
-PRINT 'Script executado com sucesso!';
-PRINT 'Tabelas criadas/verificadas:';
-PRINT '  - app_user';
-PRINT '  - app_user_roles';
-PRINT '  - todo';
-PRINT '  - notification';
-PRINT '  - suggestion';
-PRINT '  - time_block';
-PRINT '  - t_gp_mottu_token_push';
-PRINT '============================================';
 GO
