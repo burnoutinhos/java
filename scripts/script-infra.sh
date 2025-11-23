@@ -160,57 +160,57 @@ az sql server firewall-rule create \
 # ============================
 # EXECUTAR SCRIPT SQL DE CRIAÇÃO DAS TABELAS
 # ============================
-echo ""
-echo "=========================================="
-echo "📄 Executando script de criação das tabelas"
-echo "=========================================="
+# echo ""
+# echo "=========================================="
+# echo "📄 Executando script de criação das tabelas"
+# echo "=========================================="
 
-# Obter o diretório do script atual
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SQL_SCRIPT_PATH="$SCRIPT_DIR/script-bd.sql"
+# # Obter o diretório do script atual
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# SQL_SCRIPT_PATH="$SCRIPT_DIR/script-bd.sql"
 
-# Verificar se o arquivo SQL existe
-if [ ! -f "$SQL_SCRIPT_PATH" ]; then
-    echo "⚠️  Arquivo script-bd.sql não encontrado em $SQL_SCRIPT_PATH"
-    echo "Pulando execução do script SQL..."
-else
-    echo "✓ Arquivo SQL encontrado: $SQL_SCRIPT_PATH"
-    echo "Conectando ao SQL Server: $SERVER_NAME.database.windows.net"
-    
-    # Método 1: Tentar usar sqlcmd (mais comum)
-    if command -v sqlcmd &> /dev/null; then
-        echo "Usando sqlcmd para executar o script..."
-        sqlcmd -S "$SERVER_NAME.database.windows.net" \
-               -U "$DB_USERNAME" \
-               -P "$DB_PASSWORD" \
-               -d "$DB_NAME" \
-               -i "$SQL_SCRIPT_PATH" \
-               -b
-        
-        if [ $? -eq 0 ]; then
-            echo "✅ Script SQL executado com sucesso!"
-        else
-            echo "❌ Erro ao executar script SQL com sqlcmd."
-            exit 1
-        fi
-    else
-        echo "⚠️  sqlcmd não está instalado."
-        echo ""
-        echo "Para instalar no Ubuntu/Debian:"
-        echo "  curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -"
-        echo "  curl https://packages.microsoft.com/config/ubuntu/\$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list"
-        echo "  sudo apt-get update"
-        echo "  sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev"
-        echo "  echo 'export PATH=\"\$PATH:/opt/mssql-tools/bin\"' >> ~/.bashrc"
-        echo ""
-        echo "Após instalar, execute novamente este script ou execute manualmente:"
-        echo "  sqlcmd -S $SERVER_NAME.database.windows.net -U $DB_USERNAME -P '$DB_PASSWORD' -d $DB_NAME -i $SQL_SCRIPT_PATH"
-        echo ""
-        echo "⚠️  Continuando sem executar o script SQL..."
-    fi
-fi
+# # Verificar se o arquivo SQL existe
+# if [ ! -f "$SQL_SCRIPT_PATH" ]; then
+#     echo "⚠️  Arquivo script-bd.sql não encontrado em $SQL_SCRIPT_PATH"
+#     echo "Pulando execução do script SQL..."
+# else
+#     echo "✓ Arquivo SQL encontrado: $SQL_SCRIPT_PATH"
+#     echo "Conectando ao SQL Server: $SERVER_NAME.database.windows.net"
 
-echo ""
+#     # Método 1: Tentar usar sqlcmd (mais comum)
+#     if command -v sqlcmd &> /dev/null; then
+#         echo "Usando sqlcmd para executar o script..."
+#         sqlcmd -S "$SERVER_NAME.database.windows.net" \
+#                -U "$DB_USERNAME" \
+#                -P "$DB_PASSWORD" \
+#                -d "$DB_NAME" \
+#                -i "$SQL_SCRIPT_PATH" \
+#                -b
+
+#         if [ $? -eq 0 ]; then
+#             echo "✅ Script SQL executado com sucesso!"
+#         else
+#             echo "❌ Erro ao executar script SQL com sqlcmd."
+#             exit 1
+#         fi
+#     else
+#         echo "⚠️  sqlcmd não está instalado."
+#         echo ""
+#         echo "Para instalar no Ubuntu/Debian:"
+#         echo "  curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -"
+#         echo "  curl https://packages.microsoft.com/config/ubuntu/\$(lsb_release -rs)/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list"
+#         echo "  sudo apt-get update"
+#         echo "  sudo ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev"
+#         echo "  echo 'export PATH=\"\$PATH:/opt/mssql-tools/bin\"' >> ~/.bashrc"
+#         echo ""
+#         echo "Após instalar, execute novamente este script ou execute manualmente:"
+#         echo "  sqlcmd -S $SERVER_NAME.database.windows.net -U $DB_USERNAME -P '$DB_PASSWORD' -d $DB_NAME -i $SQL_SCRIPT_PATH"
+#         echo ""
+#         echo "⚠️  Continuando sem executar o script SQL..."
+#     fi
+# fi
+
+# echo ""
 # ============================
 # APPLICATION INSIGHTS
 # ============================
