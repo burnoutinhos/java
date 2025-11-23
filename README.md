@@ -1,3 +1,7 @@
+# Burnoutinhos - App de gestão pessoal
+
+Pontos fortes do app:
+
 ## 🧠 Uso de Inteligência Artificial
 
 No backend, o Burnoutinhos utiliza **Java com Spring Boot** integrado ao **Spring AI**, consumindo o modelo **Llama 3 Instant da Groq AI** para fornecer recursos inteligentes dentro do aplicativo. A IA é utilizada para gerar sugestões de organização de tarefas, otimização automática de blocos de tempo, identificação de padrões de estresse e apoio ao planejamento diário. Toda a comunicação com a IA é feita de forma segura, com endpoints estruturados, separação de responsabilidades e uso de DTOs para garantir clareza e robustez no fluxo de dados.
