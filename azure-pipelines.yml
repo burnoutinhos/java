@@ -25,7 +25,7 @@ steps:
 # https://aka.ms/yaml
 - task: SqlAzureDacpacDeployment@1
   inputs:
-    azureSubscription: 'Azure for Students(2)(8f55ccac-5075-4334-ace5-1efd09027f00)'
+    azureSubscription: 'SQL Connection Script'
     AuthenticationType: 'servicePrincipal'
     ServerName: 'sql-server-burnoutinhos-eastus2.database.windows.net'
     DatabaseName: 'burnoutinhos-db'
